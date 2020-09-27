@@ -43,11 +43,21 @@ public class Philosophers extends Thread {
 		if(a.mutex.availablePermits()>0)return true;
 		else return false;
 	}
+	public synchronized void think() {
+		
+	}
+	public synchronized void eat() {
+		
+	}
+	public synchronized void waiting() {
+		
+	}
 	public void run() {
-		for(int i=0; i<9; i++) {
-			
+		
+		for(int i=0;i<9;i++) {
+		 
           if(state == thinking) {
-				System.out.println("Triet gia thu"+id+"dang nghi");
+        	  System.out.println("Triet gia thu"+id+"dang nghi");
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
@@ -59,6 +69,7 @@ public class Philosophers extends Thread {
 					state = eating;
 				}
 				else {
+					
 					state = waiting;
 					
 				}
@@ -78,8 +89,14 @@ public class Philosophers extends Thread {
 			} 
 			if(state ==waiting) {
 				System.out.println("Triet gia thu"+id+"dang doi");
-				this.acquire();
-				state = eating;
+				while(true) {
+					if(this.check_free(leftChopstick)&&this.check_free(rightChopstick)) {
+						this.acquire();
+						state = eating;
+						break;
+					}
+				}
+				
 			}
 				
 		}

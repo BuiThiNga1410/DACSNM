@@ -2,7 +2,7 @@ package hdh_philosophers;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 public class Chopstick {
-	static int id;
+	private int id;
 	Semaphore mutex;
 	public static void main(String[] args) {
 		
