@@ -1,15 +1,17 @@
 package hdh_philosophers;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.util.*;
-public class Philosophers extends Thread {
+public class Philosophers extends Thread{
 	static final int thinking = 0;
 	static final int eating = 1;
 	static final int waiting = 2;
 	Chopstick leftChopstick;
 	Chopstick rightChopstick;
+	
 	private Random time = new Random();
 	private int id;
 	private int state;
-	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
@@ -43,33 +45,26 @@ public class Philosophers extends Thread {
 		if(a.mutex.availablePermits()>0)return true;
 		else return false;
 	}
-	public synchronized void think() {
-		
-	}
-	public synchronized void eat() {
-		
-	}
-	public synchronized void waiting() {
-		
+	public int get_State() {
+		return this.state;
 	}
 	public void run() {
-		
-		for(int i=0;i<9;i++) {
-		 
+		System.out.println("Triet gia thu "+id+" dang nghi");
+		for(int i=0;i<2;i++) {
           if(state == thinking) {
-        	  System.out.println("Triet gia thu"+id+"dang nghi");
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(5000+time.nextInt(1000));
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				if(this.check_free(leftChopstick)&&this.check_free(rightChopstick)) {
 					this.acquire();
+					System.out.println("Triet gia thu"+id+"dang an");
 					state = eating;
 				}
 				else {
-					
+					System.out.println("Triet gia thu"+id+"dang doi");
 					state = waiting;
 					
 				}
@@ -77,21 +72,21 @@ public class Philosophers extends Thread {
 			}
 			
 			if(state == eating) {
-				System.out.println("Triet gia thu"+id+"dang an");
 				try {
-					Thread.sleep(100);
+					Thread.sleep(4000+time.nextInt(1000));
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				this.release();
 			    state =thinking;
+			    System.out.println("Triet gia thu "+id+" dang nghi");
 			} 
 			if(state ==waiting) {
-				System.out.println("Triet gia thu"+id+"dang doi");
 				while(true) {
 					if(this.check_free(leftChopstick)&&this.check_free(rightChopstick)) {
 						this.acquire();
+						System.out.println("Triet gia thu"+id+"dang an");
 						state = eating;
 						break;
 					}
@@ -103,4 +98,3 @@ public class Philosophers extends Thread {
 		
 	}
 }
-
