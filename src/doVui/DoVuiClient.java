@@ -28,6 +28,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
@@ -51,29 +53,38 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 	int h = 600;
 	Image background, play;
 	Timer time_play;
-	public static void main(String[] args)  {
-	 new DoVuiClient();
+	Color color_A,color_B,color_C,color_D;
+	long currentFrame;
+	Clip win_game,die_game,start_game,play_game;
+	public static void main(String[] args) throws IOException, UnsupportedAudioFileException, LineUnavailableException {
+		new DoVuiClient();
+	}
+	public void playSound (Clip clip) 
+	{ 
+			clip.loop(Clip.LOOP_CONTINUOUSLY);
+		    clip.start();
+		   
+	}
+	
+	public void pauseSound(Clip clip) {
+		this.currentFrame =  clip.getMicrosecondPosition(); 
+		clip.stop();
 		
 	}
-	public void playSound () 
-	{ 
-		try{
-		     AudioInputStream audioInputStream =AudioSystem.getAudioInputStream(new File("E:\\hi.wav").getAbsoluteFile());
-		     Clip clip = AudioSystem.getClip();
-		     clip.open(audioInputStream);
-		     clip.start( );
-		    }
-		   catch(Exception ex)
-		   {  
-			   System.out.println(ex);
-		   }
+	public void stopSound(Clip clip) {
+		this.currentFrame = 0L;
+		clip.stop();
+		clip.close();
+		
 	}
-	
-	
-	public DoVuiClient() {
+	public DoVuiClient() throws IOException, UnsupportedAudioFileException, LineUnavailableException {
 		try {
+			color_A = Color.yellow;
+			color_B = Color.yellow;
+			color_C = Color.yellow;
+			color_D = Color.yellow;
+
 			time_play=new Timer();
-//			this.playSound();
 			stt = 0;
 			time=20;
 			state = start;
@@ -85,9 +96,7 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 			this.socket = new Socket("localhost",7111);
 			System.out.println("da ket noi");
 			dout = new DataOutputStream(socket.getOutputStream());
-			din = new DataInputStream(socket.getInputStream());
-			
-			
+			din = new DataInputStream(socket.getInputStream());			
 			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -100,13 +109,31 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 		this.setSize(w,h);
 		this.setDefaultCloseOperation(3);
 		this.setLayout(null);
-	
+		
         bufImg = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
 		g = bufImg.getGraphics();
         this.setVisible(true);
         this.addMouseListener(this);
         background = getToolkit().getImage("D:\\background.jpg");
         play = getToolkit().getImage("D:\\play.jpg");
+        
+        AudioInputStream audioInputStream1 =AudioSystem.getAudioInputStream(new File("sound\\win.wav").getAbsoluteFile());
+	    win_game = AudioSystem.getClip();
+	    win_game.open(audioInputStream1);
+	    
+	    AudioInputStream audioInputStream2 =AudioSystem.getAudioInputStream(new File("sound\\start.wav").getAbsoluteFile());
+	    start_game = AudioSystem.getClip();
+	    start_game.open(audioInputStream2);
+	    
+	    AudioInputStream audioInputStream3 =AudioSystem.getAudioInputStream(new File("sound\\die.wav").getAbsoluteFile());
+	    die_game = AudioSystem.getClip();
+	    die_game.open(audioInputStream3);
+	    
+	    AudioInputStream audioInputStream4 =AudioSystem.getAudioInputStream(new File("sound\\play.wav").getAbsoluteFile());
+	    play_game = AudioSystem.getClip();
+	    play_game.open(audioInputStream4);
+	    
+	    this.playSound(start_game);
         time_play.schedule(new TimerTask() {
 			  @Override
 			  public void run() {
@@ -128,28 +155,33 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 
 			
 			},0,1000);
+        
 	}
 	public void answer() {
 		try {
 			String t = din.readUTF();
 			System.out.println(t);
 			if(t.equals("true")) {
-				stt++;
 				state = correct;
-				time=20;
 				
 				question = din.readUTF();
 				a = din.readUTF();
 				b = din.readUTF();
 				c = din.readUTF();
 				d = din.readUTF();
-							
+				
+				this.pauseSound(play_game);
+				
+					
 			}
 			else if(t.equals("false")) {
 				state = incorrect;
 				dout.close();
 				din.close();
 				socket.close();
+				
+				this.pauseSound(play_game);
+			
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -173,6 +205,8 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 				c = din.readUTF();
 				d = din.readUTF();
 				
+				this.pauseSound(start_game);
+				this.playSound(play_game);
 					
 			} catch (IOException e1) {
 					// TODO Auto-generated catch block
@@ -186,6 +220,7 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 			
 			if(x>80 && x<250 && y>330 && y<400) {
 				try {
+					color_A = Color.red;
 					dout.writeUTF("A");
 					dout.flush();
 					answer();
@@ -196,6 +231,7 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 			}
 			else if(x>255 && x<425 && y>330 && y<400) {
 				try {
+					color_B = Color.red;
 					dout.writeUTF("B");
 					dout.flush();
 					answer();
@@ -206,6 +242,7 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 			}
 			else if(x>80 && x<250 && y>410 && y<480 ) {
 				try {
+					color_C = Color.red;
 					dout.writeUTF("C");
 					dout.flush();
 					answer();
@@ -216,6 +253,7 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 			}
 			else if(x>255 && x<425 && y>410 && y<480) {
 				try {
+					color_D = Color.red;
 					dout.writeUTF("D");
 					dout.flush();
 					answer();
@@ -224,7 +262,8 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 					e1.printStackTrace();
 				}
 			}
-		}	
+		}
+		
 	}
 	@Override
 	public void mousePressed(MouseEvent e) {
@@ -249,54 +288,95 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 	public void paint(Graphics g1) {
 		if(state == start) {
 			g.drawImage(background, 0, 0,w,h, this);
+			
 			g.setColor(Color.red);
 			g.setFont(new Font("Georgia",Font.BOLD,30));
 			g.drawString("DO VUI", 200, 100);
 			
 			g.setColor(Color.yellow);
-			g.fillOval(250, 350, 150, 80);
+			g.fillRect(250, 350, 150, 80);
 			g.setColor(Color.green);
-			g.setFont(new Font("arial",Font.BOLD,25));	
+			g.setFont(new Font("arial",Font.BOLD,30));	
 			g.drawString("PLAY", 280, 400);
+			
+			g1.drawImage(bufImg, 0, 0, w, h, null);
+			repaint();
 		}
 		else if(state == playing){
-			
 			paintPlay(g1);
-			
+			g1.drawImage(bufImg, 0, 0, w, h, null);
+			repaint();
 		}
 		else if(state == correct) {
+			paintPlay(g1);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			g.drawImage(background, 0, 0,w,h, this);
 			g.setColor(Color.red);
 			g.setFont(new Font("Georgia",Font.BOLD,30));
-			g.drawString("CORRECT", 200, 300);
+			g.drawString("CORRECT", 200, 300);		
+			
+			g1.drawImage(bufImg, 0, 0, w, h, null);
+			this.playSound(win_game);
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			color_A=Color.yellow;
+			color_B=Color.yellow;
+			color_C=Color.yellow;
+			color_D=Color.yellow;
+			
 			state = playing;
+			
+			time=20;
+			stt++;
+			
+			this.pauseSound(win_game);
+			this.playSound(play_game);
+			
+			repaint();
+			
 		}
 		else if(state == incorrect) {
+			paintPlay(g1);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			g.drawImage(background, 0, 0,w,h, this);
 			g.setColor(Color.red);
 			g.setFont(new Font("Georgia",Font.BOLD,30));
 			g.drawString("INCORRECT", 200, 300);
 			state = finish;
+			g1.drawImage(bufImg, 0, 0, w, h, null);
+			this.playSound(die_game);
+			
 		}
-		
-		g1.drawImage(bufImg, 0, 0, w, h, null);
-		
-		repaint();
+	
 		
 	}
 	public void paintPlay(Graphics g1) {
-	
 		g.drawImage(play, 0, 0,w,h, this);
+		
 		g.setColor(Color.WHITE);
 		g.setFont(new Font("Georgia",Font.BOLD,30));
 		g.drawString("QUESTION", 150, 100);
 		
 		g.setColor(Color.yellow);
-		g.setFont(new Font("Georgia",Font.BOLD,40));
+		g.setFont(new Font("arial",Font.BOLD,40));
 		g.drawString(String.valueOf(time), 10,100);
 		
 		g.setColor(Color.WHITE);
-		g.setFont(new Font("Georgia",Font.BOLD,40));
+		g.setFont(new Font("arial",Font.BOLD,40));
 		g.drawString(String.valueOf(stt), 225, 155);
 		
 		g.setColor(Color.blue);
@@ -305,25 +385,25 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 		g.setFont(new Font("UTF-8",Font.BOLD,15));
 		g.drawString(question,100,250);
 			
-		g.setColor(Color.yellow);
+		g.setColor(color_A);
 		g.fillRect(80, 330, 170, 70);
 		g.setColor(Color.white);
 		g.setFont(new Font("UTF-8",Font.BOLD,15));
 		g.drawString("A. "+a,100,360);
 			
-		g.setColor(Color.yellow);
+		g.setColor(color_B);
 		g.fillRect(255, 330, 170, 70);
 		g.setColor(Color.white);
 		g.setFont(new Font("UTF-8",Font.BOLD,15));
 		g.drawString("B. "+b,280,360);
 			
-		g.setColor(Color.yellow);
+		g.setColor(color_C);
 		g.fillRect(80, 410, 170, 70);
 		g.setColor(Color.white);
 		g.setFont(new Font("UTF-8",Font.BOLD,15));
 		g.drawString("C. "+c,100,440);
 			
-		g.setColor(Color.yellow);
+		g.setColor(color_D);
 		g.fillRect(255, 410, 170, 70);
 		g.setColor(Color.white);
 		g.setFont(new Font("UTF-8",Font.BOLD,15));
