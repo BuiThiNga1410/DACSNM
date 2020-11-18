@@ -49,10 +49,10 @@ public class App extends JFrame{
 		g = bufImg.getGraphics();
 		this.setVisible(true);
 		img_states = new ArrayList<Image>();
-		table = getToolkit().getImage("D:\\ban_an.png");
-		img_states.add(getToolkit().getImage("D:\\thinking.jpg"));
-		img_states.add(getToolkit().getImage("D:\\eating.png"));
-		img_states.add(getToolkit().getImage("D:\\waiting.jpg"));
+		table = getToolkit().getImage("img\\ban_an.png");
+		img_states.add(getToolkit().getImage("img\\thinking.jpg"));
+		img_states.add(getToolkit().getImage("img\\eating.png"));
+		img_states.add(getToolkit().getImage("img\\waiting.jpg"));
 	}
 	public void paint(Graphics g1) {
 		g.setColor(Color.white);

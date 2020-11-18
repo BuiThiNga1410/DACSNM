@@ -82,12 +82,13 @@ class ThreadSocket extends Thread {
 				Statement stm=con.createStatement();
 				int id;
 				String y;
-				while(state) {
+				int stt=1;
+				while(state&&stt<=5) {
 					id=1;
 					question(id,stm);
 					y = din.readUTF();
 					answer(id, y, stm);
-					
+					stt++;
 				}
 			}
 				
