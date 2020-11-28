@@ -47,13 +47,12 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 	DataInputStream din;
 	DataOutputStream dout;
 	String question,a,b,c,d;
-	int stt,state;
-	int time;
+	int stt,state,time;
 	BufferedImage bufImg;
 	Graphics g;
-	int w = 500;
-	int h = 650;
-	Image background, play, question_img, play_button, dapan, correct_img, incorrect_img,win_img;
+	boolean volume;
+	int w = 500, h = 650;
+	Image background, play, question_img, play_button, dapan, correct_img, incorrect_img,win_img,word,exit,volume_btn,again;
 	Timer time_play;
 	Color color_A,color_B,color_C,color_D;
 	long currentFrame;
@@ -81,11 +80,11 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 	}
 	public DoVuiClient() throws IOException, UnsupportedAudioFileException, LineUnavailableException {
 		try {
-			color_A = Color.yellow;
-			color_B = Color.yellow;
-			color_C = Color.yellow;
-			color_D = Color.yellow;
-
+			color_A = Color.black;
+			color_B = Color.black;
+			color_C = Color.black;
+			color_D = Color.black;
+			volume = true;
 			time_play=new Timer();
 			stt = 0;
 			time=20;
@@ -117,13 +116,17 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
         this.setVisible(true);
         this.addMouseListener(this);
         background = getToolkit().getImage("img\\background.png");
-        play = getToolkit().getImage("img\\play.jpg");
+        play = getToolkit().getImage("img\\background2.jpg");
         play_button = getToolkit().getImage("img\\play.png");
-        question_img = getToolkit().getImage("img\\question.jpg");
-        dapan = getToolkit().getImage("img\\dapan.jpg");
-        correct_img = getToolkit().getImage("img\\correct.png");
-        incorrect_img = getToolkit().getImage("img\\incorrect.png");
+        question_img = getToolkit().getImage("img\\question1.png");
+        dapan = getToolkit().getImage("img\\answer1.png");
+        correct_img = getToolkit().getImage("img\\correct4.png");
+        incorrect_img = getToolkit().getImage("img\\incorrect1.png");
         win_img = getToolkit().getImage("img\\win.jpg");
+        word = getToolkit().getImage("img\\word.png");
+        exit = getToolkit().getImage("img\\exit.png");
+        again = getToolkit().getImage("img\\again.png");
+        volume_btn = getToolkit().getImage("img\\VolumeNormalBlue.png");
         
         AudioInputStream audioInputStream1 =AudioSystem.getAudioInputStream(new File("sound\\win.wav").getAbsoluteFile());
 	    win_game = AudioSystem.getClip();
@@ -191,10 +194,6 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 			}
 			else if(t.equals("false")) {
 				state = incorrect;
-				dout.close();
-				din.close();
-				socket.close();
-				
 				this.pauseSound(play_game);
 			
 			}
@@ -208,7 +207,61 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 	public void mouseClicked(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
-		if(x>230 && x<380 && y>450 && y<510 && state==start) {
+		if(state != start && state != finish && x>400 && x<460 && y>60 && y<120) {
+			volume = !volume;
+			if(volume) {
+				volume_btn = getToolkit().getImage("img\\VolumeNormalBlue.png");
+				if (state==playing) playSound(play_game);
+				else if(state == correct || state ==win) playSound(win_game);
+			}
+			
+			else {
+				pauseSound(play_game);
+				pauseSound(win_game);
+				volume_btn = getToolkit().getImage("img\\mute.png");
+			}
+		}
+		else if((state==start && x>50 && x<120 && y>350 && y<420) || (x>50 && x<120 && y>120 && y<190 && state==finish) ) {
+			
+			try {
+				dout.writeUTF("stop");
+				dout.flush();
+				dout.close();
+				din.close();
+				socket.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			state = finish;
+			System.exit(1);
+			
+		}
+		else if(state==finish && x>390 && x<450 && y>120 && y<180) {
+			volume = !volume;
+			if(volume) {
+				playSound(die_game);
+				volume_btn = getToolkit().getImage("img\\VolumeNormalBlue.png");
+			}
+			
+			else {
+				pauseSound(die_game);
+				volume_btn = getToolkit().getImage("img\\mute.png");
+			}
+		}
+		else if(state==start && x>390 && x<450 && y>350 && y<410 ) {
+			volume = !volume;
+			if(volume) {
+				playSound(start_game);
+				volume_btn = getToolkit().getImage("img\\VolumeNormalBlue.png");
+			}
+			
+			else {
+				pauseSound(start_game);
+				volume_btn = getToolkit().getImage("img\\mute.png");
+			}
+		}
+		else if((x>200 && x<350 && y>500 && y<560 && state==start) || (x>200 && x<350 && y>500 && y<560 && state==finish)) {
 			
 			stt = 1;
 			try {
@@ -220,8 +273,11 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 				c = din.readUTF();
 				d = din.readUTF();
 				
-				this.pauseSound(start_game);
-				this.playSound(play_game);
+				if(volume) {
+					this.pauseSound(start_game);
+					this.pauseSound(die_game);
+					this.playSound(play_game);
+				}
 					
 			} catch (IOException e1) {
 					// TODO Auto-generated catch block
@@ -233,9 +289,9 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 		}
 		else if(state==playing) {
 			
-			if(x>50 && x<210 && y>370 && y<440) {
+			if(x>30 && x<240 && y>355 && y<455) {
 				try {
-					color_A = Color.red;
+					color_A = Color.white;
 					dout.writeUTF("A");
 					dout.flush();
 					answer();
@@ -244,9 +300,9 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 					e1.printStackTrace();
 				}
 			}
-			else if(x>280 && x<440 && y>370 && y<440) {
+			else if(x>260 && x<470 && y>355 && y<455) {
 				try {
-					color_B = Color.red;
+					color_B = Color.white;
 					dout.writeUTF("B");
 					dout.flush();
 					answer();
@@ -255,9 +311,9 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 					e1.printStackTrace();
 				}
 			}
-			else if(x>50 && x<210 && y>500 && y<570 ) {
+			else if(x>30 && x<240 && y>485 && y<585 ) {
 				try {
-					color_C = Color.red;
+					color_C = Color.white;
 					dout.writeUTF("C");
 					dout.flush();
 					answer();
@@ -266,9 +322,9 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 					e1.printStackTrace();
 				}
 			}
-			else if(x>280 && x<440 && y>500 && y<570) {
+			else if(x>260 && x<470 && y>485 && y<585) {
 				try {
-					color_D = Color.red;
+					color_D = Color.white;
 					dout.writeUTF("D");
 					dout.flush();
 					answer();
@@ -278,6 +334,7 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 				}
 			}
 		}
+		
 		
 	}
 	@Override
@@ -305,17 +362,14 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 			g.drawImage(correct_img, 150, 150,200,200, null);
 			g.drawImage(incorrect_img, 150, 150,200,200, null);
 			g.drawImage(win_img, 150, 150,200,200, null);
+			g.drawImage(word, 150, 150,200,200, null);
+			g.drawImage(again, 50, 350,70,70, null);
 			g.drawImage(background, 0, 0,w,h, this);
+				
+			g.drawImage(play_button, 200, 500,150,60, this);	
 			
-			g.setColor(Color.yellow);
-			g.setFont(new Font("UTF-8",Font.BOLD,45));
-			g.drawString("FUNNY \nQUESTION", 50, 170);
-//			g.getFontMetrics().getStringBounds(question, g).getWidth();
-			
-			
-			
-			g.drawImage(play_button, 230, 450,150,60, this);
-			
+			g.drawImage(exit, 50, 350,70,70, this);
+			g.drawImage(volume_btn, 390, 350,60,60, this);
 			g1.drawImage(bufImg, 0, 0, w, h, null);
 			repaint();
 		}
@@ -332,29 +386,31 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			g.drawImage(play, 0, 0,w,h, this);
-			g.drawImage(correct_img, 150, 150,200,200, this);
-			
+//			g.drawImage(play, 0, 0,w,h, this);
+			g.drawImage(correct_img, 0, 0,w,h, this);
+			g.drawImage(word, 50, 50,400,60, this);
+//			g.drawImage(volume_btn, 400, 60,60,60, this);
 			g1.drawImage(bufImg, 0, 0, w, h, null);
-			this.playSound(win_game);
+			if(volume)this.playSound(win_game);
 			try {
 				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			color_A=Color.yellow;
-			color_B=Color.yellow;
-			color_C=Color.yellow;
-			color_D=Color.yellow;
+			color_A=Color.black;
+			color_B=Color.black;
+			color_C=Color.black;
+			color_D=Color.black;
 			
 			state = playing;
 			
 			time=20;
 			stt++;
-			
-			this.pauseSound(win_game);
-			this.playSound(play_game);
+			if(volume) {
+				this.pauseSound(win_game);
+				this.playSound(play_game);
+			}
 			
 			repaint();
 			
@@ -367,17 +423,28 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			g.drawImage(play, 0, 0,w,h, this);
-			g.drawImage(incorrect_img, 150, 150,200,200, this);
-			
-			g.setColor(Color.black);
-			g.setFont(new Font("Georgia",Font.BOLD,40));
-			g.drawString("INCORRECT", 120, 300);
 			
 			state = finish;
+			color_A=Color.black;
+			color_B=Color.black;
+			color_C=Color.black;
+			color_D=Color.black;
 			g1.drawImage(bufImg, 0, 0, w, h, null);
-			this.playSound(die_game);
+			if(volume)this.playSound(die_game);
+			repaint();
 		}		
+		else if(state == finish) {
+			g.drawImage(play, 0, 0,w,h, this);
+			g.drawImage(word, 50, 50,400,60, this);
+			g.drawImage(incorrect_img, 5, 100,490,300, this);
+			g.drawImage(again, 200, 500,150,60, this);	
+			
+			g.drawImage(exit, 50, 120,70,70, this);
+			g.drawImage(volume_btn, 390, 120,60,60, this);	
+			g1.drawImage(bufImg, 0, 0, w, h, null);
+			repaint();
+			
+		}
 		else if(state == win) {
 			paintPlay(g1);
 			try {
@@ -388,24 +455,26 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 			}
 			g.drawImage(play, 0, 0,w,h, this);
 			g.drawImage(win_img, 50, 50,w-100,h-200, this);
+			g.drawImage(volume_btn, 400, 60,60,60, this);
 			
 			g.setColor(Color.GREEN);
 			g.setFont(new Font("Georgia",Font.BOLD,30));
 			g.drawString("WINNER", 170, 70);
 			
-			state = finish;
+			
 			g1.drawImage(bufImg, 0, 0, w, h, null);
-			this.playSound(win_game);
+			if(volume)this.playSound(win_game);
+			repaint();
 		}
 	}
 	void drawString(Graphics g, String text, int x, int y) {
 		String[] s = text.split(" ");
-		int line = s.length/9;
+		int line = s.length/10;
 		y= y-g.getFontMetrics().getHeight()*line/2;
-		for(int i=0;i<s.length;i+=9) {
+		for(int i=0;i<s.length;i+=10) {
 			String t = s[i];
 			
-			for(int j=1;j<9;j++) {
+			for(int j=1;j<10;j++) {
 				if(i+j<s.length) {
 					t = t.concat(" "+s[i+j]);
 				}
@@ -416,50 +485,43 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 	}
 	public void paintPlay(Graphics g1) {
 		g.drawImage(play, 0, 0,w,h, this);
+		g.drawImage(volume_btn, 400, 60,60,60, this);
 		
 		g.setColor(Color.PINK);
 		g.setFont(new Font("Georgia",Font.BOLD,30));
-		g.drawString("QUESTION", 150, 100);
+		g.drawString("QUESTION: "+String.valueOf(stt), 150, 100);
 		
 		g.setColor(Color.yellow);
 		g.setFont(new Font("arial",Font.BOLD,40));
 		g.drawString(String.valueOf(time), 20,100);
 		
-		g.setColor(Color.WHITE);
-		g.setFont(new Font("arial",Font.BOLD,40));
-		g.drawString(String.valueOf(stt), 225, 155);
-		
-		g.drawImage(question_img, 50, 180,400,150, this);
-		g.setColor(Color.white);
+//		g.setColor(Color.WHITE);
+//		g.setFont(new Font("arial",Font.BOLD,40));
+//		g.drawString(String.valueOf(stt), 225, 155);
+//		
+		g.drawImage(question_img, 30, 80,440,250, this);
+		g.setColor(Color.black);
 		g.setFont(new Font("UTF-8",Font.BOLD,16));
 		drawString(g,question,80,235);
 			
-		g.drawImage(dapan, 35, 355,190,100, this);
+		g.drawImage(dapan, 30, 355,210,100, this);
 		g.setColor(color_A);
-		g.fillRect(50, 370, 160, 70);
-		g.setColor(Color.white);
-		g.setFont(new Font("UTF-8",Font.BOLD,15));
+		g.setFont(new Font("UTF-8",Font.BOLD,17));
 		g.drawString("A. "+a,70,410);
 			
-		g.drawImage(dapan, 265, 355,190,100, this);
+		g.drawImage(dapan, 260, 355,210,100, this);
 		g.setColor(color_B);
-		g.fillRect(280, 370, 160, 70);
-		g.setColor(Color.white);
-		g.setFont(new Font("UTF-8",Font.BOLD,15));
+		g.setFont(new Font("UTF-8",Font.BOLD,17));
 		g.drawString("B. "+b,300,410);
 		
-		g.drawImage(dapan, 35, 485,190,100, this);
+		g.drawImage(dapan, 30, 485,210,100, this);
 		g.setColor(color_C);
-		g.fillRect(50, 500, 160, 70);
-		g.setColor(Color.white);
-		g.setFont(new Font("UTF-8",Font.BOLD,15));
+		g.setFont(new Font("UTF-8",Font.BOLD,17));
 		g.drawString("C. "+c,70,540);
 			
-		g.drawImage(dapan, 265, 485,190,100, this);
+		g.drawImage(dapan, 260, 485,210,100, this);
 		g.setColor(color_D);
-		g.fillRect(280, 500, 160, 70);
-		g.setColor(Color.white);
-		g.setFont(new Font("UTF-8",Font.BOLD,15));
+		g.setFont(new Font("UTF-8",Font.BOLD,17));
 		g.drawString("D. "+d,300,540);
 		
 		g1.drawImage(bufImg, 0, 0, w, h, null);	

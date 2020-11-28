@@ -75,23 +75,31 @@ class ThreadSocket extends Thread {
 		try {
 			din = new DataInputStream(socket.getInputStream());
 			dout = new DataOutputStream(socket.getOutputStream());
-			String x = din.readUTF();
-			if(x.equals("play")) {	
-				Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-				java.sql.Connection con=DriverManager.getConnection("jdbc:sqlserver://DESKTOP-NLC0EVM\\\\SQLEXPRESS:1433;databaseName=DoVui;integratedSecurity=true");
-				Statement stm=con.createStatement();
-				int id;
-				String y;
-				int stt=1;
-				while(state&&stt<=5) {
-					id=1;
-					question(id,stm);
-					y = din.readUTF();
-					answer(id, y, stm);
-					stt++;
+			while(true) {
+				String x = din.readUTF();
+				state=true;
+				if(x.equals("play")) {	
+					Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+					java.sql.Connection con=DriverManager.getConnection("jdbc:sqlserver://DESKTOP-NLC0EVM\\\\SQLEXPRESS:1433;databaseName=DoVui;integratedSecurity=true");
+					Statement stm=con.createStatement();
+					int id;
+					String y;
+					int stt=1;
+					while(state&&stt<=5) {
+						id=1;
+						question(id,stm);
+						y = din.readUTF();
+						answer(id, y, stm);
+						stt++;
+					}
+				}
+				else {
+					din.close();
+					dout.close();
+					break;
 				}
 			}
-				
+			
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
