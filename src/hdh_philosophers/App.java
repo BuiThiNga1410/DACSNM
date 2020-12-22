@@ -50,7 +50,7 @@ public class App extends JFrame{
 		this.setVisible(true);
 		img_states = new ArrayList<Image>();
 		table = getToolkit().getImage("img\\ban_an.png");
-		img_states.add(getToolkit().getImage("img\\thinking.jpg"));
+		img_states.add(getToolkit().getImage("img\\thinking.png"));
 		img_states.add(getToolkit().getImage("img\\eating.png"));
 		img_states.add(getToolkit().getImage("img\\waiting.jpg"));
 	}
@@ -58,11 +58,14 @@ public class App extends JFrame{
 		g.setColor(Color.white);
 		g.fillRect(0, 0, w, h);
 		
+		g.setColor(Color.black);
+		g.setFont(new Font("UTF-8",Font.BOLD,25));
+		g.drawString("BÀI TOÁN NĂM TRIẾT GIA ĂN TỐI", 100, 60);
+		
 		g.drawImage(table, 150, 150,300,300, this);
 		
 		g.setColor(Color.red);
 		g.drawRect(0, 529, 250,h-530 );
-		
 		g.setColor(Color.gray);
 		g.fillRect(0, 530, 250,h-530 );
 		
@@ -108,9 +111,6 @@ public class App extends JFrame{
 	public void draw4(Graphics g1) {
 		g.drawImage(img_states.get(philosophers.get(4).get_State()), 90, 190,50,50, this);
 		repaint();
-	}
-	public void deadlock(List<Philosophers> philosophers) {
-		
 	}
 
 }

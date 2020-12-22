@@ -50,7 +50,7 @@ public class Philosophers extends Thread{
 	}
 	public void run() {
 		System.out.println("Triet gia thu "+id+" dang nghi");
-		for(int i=0;i<2;i++) {
+		while(true) {
           if(state == thinking) {
 				try {
 					Thread.sleep(5000+time.nextInt(1000));
