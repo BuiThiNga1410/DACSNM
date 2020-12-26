@@ -20,8 +20,7 @@ public class Philosophers extends Thread{
 		this.id = id;
 		this.leftChopstick = left;
 		this.rightChopstick = right;
-		this.state= state;
-		
+		this.state= state;	
 	}
 	public void acquire() {
 		if(id != 0) {

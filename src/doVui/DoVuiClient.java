@@ -37,7 +37,7 @@ import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import java.io.File;
 
-public class DoVuiClient extends JFrame implements MouseListener, MouseMotionListener {
+public class DoVuiClient extends JFrame implements MouseListener {
 	Socket socket;
 	final static int start=0;
 	final static int playing=1;
@@ -513,7 +513,11 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 		
 		g.setColor(Color.PINK);
 		g.setFont(new Font("Georgia",Font.BOLD,30));
-		g.drawString("QUESTION: "+String.valueOf(stt), 150, 100);
+		g.drawString("QUESTION: ", 150, 100);
+		
+		g.setColor(Color.red);
+		g.setFont(new Font("Georgia",Font.BOLD,40));
+		g.drawString(String.valueOf(stt), 350, 100);
 		
 		g.setColor(Color.green);
 		g.setFont(new Font("arial",Font.BOLD,40));
@@ -547,14 +551,4 @@ public class DoVuiClient extends JFrame implements MouseListener, MouseMotionLis
 		g1.drawImage(bufImg, 0, 0, w, h, null);	
 	}
 	
-	@Override
-	public void mouseDragged(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
 }

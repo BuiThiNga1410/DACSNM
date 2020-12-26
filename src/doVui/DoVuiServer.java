@@ -150,7 +150,7 @@ class ThreadSocket extends Thread {
 	public synchronized void question(int id,Statement stm) throws IOException {
 		try {
 			if(!readFile) {
-				String sql2="select * from DOVUI where Id='"+String.valueOf(id)+"'";
+				String sql2="select * from Do_vui where Id="+id;
 				ResultSet rs=stm.executeQuery(sql2);
 				ResultSetMetaData rsmd= rs.getMetaData();
 				int t=rsmd.getColumnCount();
@@ -162,15 +162,15 @@ class ThreadSocket extends Thread {
 				}
 			}
 			else {
-				dout.writeUTF(questions.get(id-1).getQuestion());
+				dout.writeUTF(questions.get(id).getQuestion());
 				dout.flush();
-				dout.writeUTF(questions.get(id-1).getAnswer_a());
+				dout.writeUTF(questions.get(id).getAnswer_a());
 				dout.flush();
-				dout.writeUTF(questions.get(id-1).getAnswer_b());
+				dout.writeUTF(questions.get(id).getAnswer_b());
 				dout.flush();
-				dout.writeUTF(questions.get(id-1).getAnswer_c());
+				dout.writeUTF(questions.get(id).getAnswer_c());
 				dout.flush();
-				dout.writeUTF(questions.get(id-1).getAnswer_d());
+				dout.writeUTF(questions.get(id).getAnswer_d());
 				dout.flush();
 			}			
 		}catch (SQLException e) {
@@ -180,7 +180,7 @@ class ThreadSocket extends Thread {
 	}
 	public synchronized void answer(int id,String x,Statement stm) throws SQLException, IOException {
 		if(!readFile) {
-			String sql3="select * from DOVUI where Id='"+String.valueOf(id)+"'";
+			String sql3="select * from DOVUI where Id="+id;
 			ResultSet rs1=stm.executeQuery(sql3);
 			while(rs1.next()) {
 				if(x.equals(rs1.getObject("DapAn"))) {
@@ -196,7 +196,7 @@ class ThreadSocket extends Thread {
 			}
 		}
 		else {
-			if(x.equals(questions.get(id-1).getCorrect_answer())) {
+			if(x.equals(questions.get(id).getCorrect_answer())) {
 				state = true;
 				dout.writeUTF("true");
 				dout.flush();
@@ -234,7 +234,7 @@ class ThreadSocket extends Thread {
 					while(state&&stt<=5) {
 						int id;
 						do {
-							id = random.nextInt(45)+1;
+							id = random.nextInt(101);
 						}while(id_question.contains(id));
 						id_question.add(id);
 						question(id,stm);
